@@ -9,7 +9,8 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainFrame mainFrame = new MainFrame();
+                //MainFrame mainFrame = new MainFrame();
+                System.out.println("Čau");
             }
         });
     }
