@@ -1,19 +1,35 @@
 package uhk.fim.gui;
 
+import uhk.fim.model.ShoppingCart;
+import uhk.fim.model.ShoppingCartItem;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame implements ActionListener {
+    MainFrame mainFrame;
+
     // Tlačítka deklarujeme zde, abychom k nim měli přístup v metodě actionPerformed
     JButton btnInputAdd;
-    JButton btnInputRemove;
+    JTextField txtInputName, txtInputPricePerPiece;
+    JSpinner spInputPieces;
+
+    ShoppingCart shoppingCart;
+    ShoppingCartTableModel model;
 
     public MainFrame(int width, int height) {
         super("PRO2 - Shopping cart");
         setSize(width, height);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        // Vytvoříme košík (data)
+        shoppingCart = new ShoppingCart();
+        // Vytvoříme model
+        model = new ShoppingCartTableModel();
+        // Propojíme model s košíkem (data)
+        model.setShoppingCart(shoppingCart);
 
         initGUI();
     }
@@ -26,24 +42,23 @@ public class MainFrame extends JFrame implements ActionListener {
         // Vytvoříme další 3 panely. Panel pro prvky formuláře pro přidání položky.
         // Panel pro tabulku a panel pro patičku.
         JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.LEFT)); // FlowLayout LEFT - komponenty chceme zarovnat zleva doprava.
-        JPanel panelTable = new JPanel();
-        JPanel panelFooter = new JPanel();
+        JPanel panelTable = new JPanel(new BorderLayout());
+        JPanel panelFooter = new JPanel(new BorderLayout());
 
+        // *** Formulář pro přidání položky ***
         // Název
         JLabel lblInputName = new JLabel("Název: ");
-        JTextField txtInputName = new JTextField("", 15);
+        txtInputName = new JTextField("", 15);
         // Cena za 1 kus
         JLabel lblInputPricePerPiece = new JLabel("Cena/kus: ");
-        JTextField txtInputPricePerPiece = new JTextField("", 5);
+        txtInputPricePerPiece = new JTextField("", 5);
         // Počet kusů
         JLabel lblInputPieces = new JLabel("Počet kusů: ");
-        JTextField txtInputPieces = new JTextField("", 5);
+        spInputPieces = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
 
         // Tlačítka
         btnInputAdd = new JButton("Přidat");
         btnInputAdd.addActionListener(this); // Nastavení ActionListeneru - kdo obslouží kliknutí na tlačítko.
-        btnInputRemove = new JButton("Smazat"); // Toto tlačítko zde máme jen pro ukázku - v budoucnu ho odebereme
-        btnInputRemove.addActionListener(this);
 
         // Přidání komponent do horního panelu pro formulář na přidání položky
         panelInputs.add(lblInputName);
@@ -51,9 +66,19 @@ public class MainFrame extends JFrame implements ActionListener {
         panelInputs.add(lblInputPricePerPiece);
         panelInputs.add(txtInputPricePerPiece);
         panelInputs.add(lblInputPieces);
-        panelInputs.add(txtInputPieces);
+        panelInputs.add(spInputPieces);
         panelInputs.add(btnInputAdd);
-        panelInputs.add(btnInputRemove);
+
+        // *** Tabulka ***
+        JTable table = new JTable();
+        // Tabulku propojíme s naším modelem
+        table.setModel(model);
+        // Tabulku přidáme do panelu a obalíme ji komponentou JScrollPane
+        panelTable.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // *** Patička ***
+        JLabel lblTotalPrice = new JLabel("Celková cena: 0,00 Kč");
+        panelFooter.add(lblTotalPrice, BorderLayout.WEST);
 
         // Přidání (pod)panelů do panelu hlavního
         panelMain.add(panelInputs, BorderLayout.NORTH);
@@ -69,11 +94,14 @@ public class MainFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         // Metoda se volá pro každé tlačítko, musíme tedy rozhodnout, co se má skutečně stát pro konkrétní tlačítka
-        if(actionEvent.getSource() == btnInputAdd) {
-            // TODO: Domácí úkol
-            System.out.println("Přidán produkt: [NÁZEV], [CENA ZA KUS] Kč - [POČET KUSŮ] ");
-        } else if(actionEvent.getSource() == btnInputRemove) {
-            System.out.println("Kliknuto na tlačítko smazat!");
+        if (actionEvent.getSource() == btnInputAdd) {
+            // Vytvořit novou položku
+            ShoppingCartItem item = new ShoppingCartItem(txtInputName.getText(), Double.parseDouble(txtInputPricePerPiece.getText()), (int)spInputPieces.getValue());
+            // Přidat položku do košíku
+            shoppingCart.addItem(item);
+            // Refreshnout tabulku
+            model.fireTableDataChanged();
+            JOptionPane.showMessageDialog(mainFrame, "Položka přidána.", "Úspěch", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }
