@@ -16,7 +16,7 @@ public class ShoppingCartTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     // Tato metoda se volá, když se tabulka dotazuje hodnotu v buňce. Tedy pro kažkou buňku.
@@ -32,6 +32,8 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return item.getPricePerPiece();
             case 2:
                 return item.getPieces();
+            case 3:
+                return item.getTotalPrice();
             default:
                 return null;
         }
@@ -48,6 +50,8 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return "Cena/kus";
             case 2:
                 return "Počet kusů";
+            case 3:
+                return "Cena celkem";
             default:
                 return null;
         }
@@ -63,6 +67,8 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return Double.class;
             case 2:
                 return Integer.class;
+            case 3:
+                return Double.class;
             default:
                 return null;
         }
