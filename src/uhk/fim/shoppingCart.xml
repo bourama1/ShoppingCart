@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shoppingCart>
+    <shoppingCartItem dateCreate="">
+        <name>Telefon Samsung</name>
+        <pricePerPiece>9900</pricePerPiece>
+        <pieces>1</pieces>
+    </shoppingCartItem>
+    <shoppingCartItem>
+        <name>Notebook Lenovo</name>
+        <pricePerPiece>13000</pricePerPiece>
+        <pieces>2</pieces>
+    </shoppingCartItem>
+</shoppingCart>
