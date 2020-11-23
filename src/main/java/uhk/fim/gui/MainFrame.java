@@ -1,5 +1,9 @@
 package uhk.fim.gui;
 
+import com.google.gson.Gson;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentFactory;
+import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,6 +19,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class MainFrame extends JFrame implements ActionListener {
     // Tlačítka deklarujeme zde, abychom k nim měli přístup v metodě actionPerformed
@@ -116,14 +122,21 @@ public class MainFrame extends JFrame implements ActionListener {
         fileMenu.add(new AbstractAction("Otevřít") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                loadFileXmlSax();
+                //loadFileXmlSax();
                 //loadFileXmlDom();
+                loadFileXMLDom4j();
             }
         });
         fileMenu.add(new AbstractAction("Uložit") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 saveFileCsv();
+            }
+        });
+        fileMenu.add(new AbstractAction("Načti json") {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                loadJson();
             }
         });
         menuBar.add(fileMenu);
@@ -145,7 +158,7 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     private void addProductToCart() {
-        if(!txtInputName.getText().isBlank()){
+        if (!txtInputName.getText().isBlank()) {
             try {
                 // Vytvořit novou položku
                 ShoppingCartItem item = new ShoppingCartItem(txtInputName.getText().trim(), Double.parseDouble(txtInputPricePerPiece.getText().replace(",", ".")),
@@ -215,11 +228,13 @@ public class MainFrame extends JFrame implements ActionListener {
                 public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
                     content.reset();
                 }
+
                 // Parser narazil na uzavřený tag
                 @Override
                 public void endElement(String uri, String localName, String qName) throws SAXException {
                     System.out.println(qName + ": " + content.toString());
                 }
+
                 // Parser narazil na nějaký řetězec. Pozor, zavolá se i při nalezení odřádkování.
                 @Override
                 public void characters(char[] ch, int start, int length) throws SAXException {
@@ -251,19 +266,19 @@ public class MainFrame extends JFrame implements ActionListener {
             short nodeType = root.getNodeType();
             // *** Zde je jen snaha ukázat, že je nutné strukturu projít nějakou rekurzí viz. ukázky v olivě ***
             // Má kořenový element potomky?
-            if(root.hasChildNodes()){
+            if (root.hasChildNodes()) {
                 // Ano má - načteme položky do seznamu
                 NodeList list = root.getChildNodes();
                 // Projdeme seznam
-                for(int i = 0; i < list.getLength(); i++) {
+                for (int i = 0; i < list.getLength(); i++) {
                     // Načteme konkrétní node ze seznamu
                     Node nextNode = list.item(i);
                     // Opět se ptáme, jestli má potomky
-                    if(nextNode.hasChildNodes()) {
+                    if (nextNode.hasChildNodes()) {
                         // Ano má - načteme položky do seznamu
                         NodeList list2 = nextNode.getChildNodes();
                         // Projdeme seznam
-                        for(int j = 0; j <= list2.getLength(); j++){
+                        for (int j = 0; j <= list2.getLength(); j++) {
                             // Načteme konkrétní node ze seznamu
                             Node nextNode2 = list2.item(j);
                             /// !!! Tady už můžete vidět, že je ntuné vytvořit nějakou rekurzi !!!
@@ -279,5 +294,44 @@ public class MainFrame extends JFrame implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadFileXMLDom4j() {
+        DocumentFactory df = DocumentFactory.getInstance();
+        SAXReader reader = new SAXReader(df);
+
+        try {
+            org.dom4j.Document doc = reader.read(new File("src/shoppingCart.xml"));
+            System.out.println(doc.asXML());
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadJson() {
+        Gson gson = new Gson();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Simulace zatíženého serveru
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    ShoppingCart cart = gson.fromJson(new InputStreamReader(
+                            new URL("https://lide.uhk.cz/fim/student/benesja4/shoppingCart.json").openStream()
+                    ), ShoppingCart.class);
+                    System.out.println("done");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
     }
 }
