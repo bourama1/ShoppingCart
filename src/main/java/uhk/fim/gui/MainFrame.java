@@ -26,6 +26,7 @@ public class MainFrame extends JFrame implements ActionListener {
     ShoppingCart shoppingCart;
     ShoppingCartTableModel model;
     FileWorks file;
+    JTable table;
 
     public MainFrame(int width, int height) {
         super("PRO2 - Shopping cart - Matej Boura");
@@ -38,7 +39,10 @@ public class MainFrame extends JFrame implements ActionListener {
         // Vytvoříme košík (data)
         shoppingCart = new ShoppingCart();
         shoppingCart = file.loadFileCsv("storage.csv");
-        update();
+        model = new ShoppingCartTableModel();
+        model.setShoppingCart(shoppingCart);
+        initGUI();
+        updateFooter();
     }
 
     public void initGUI() {
@@ -82,14 +86,13 @@ public class MainFrame extends JFrame implements ActionListener {
         panelInputs.add(btnInputAdd);
 
         // *** Tabulka ***
-        JTable table = new JTable();
+        table = new JTable();
         table.setFillsViewportHeight(true);
-        TableCellRenderer buttonRenderer = new JTableButtonRenderer();
 
         // Tabulku propojíme s naším modelem
         model.setMainFrame(this);
         table.setModel(model);
-        table.getColumn("Odebrat").setCellRenderer(buttonRenderer);
+        table.getColumn("Odebrat").setCellRenderer(new JTableButtonRenderer());
         table.addMouseListener(new JTableButtonMouseListener(table));
         // Tabulku přidáme do panelu a obalíme ji komponentou JScrollPane
         panelTable.add(new JScrollPane(table), BorderLayout.CENTER);
@@ -183,10 +186,13 @@ public class MainFrame extends JFrame implements ActionListener {
         }
     }
 
-    private void update() {
+    public void update() {
         model = new ShoppingCartTableModel();
         model.setShoppingCart(shoppingCart);
-        initGUI();
+        model.setMainFrame(this);
+        table.setModel(model);
+        table.getColumn("Odebrat").setCellRenderer(new JTableButtonRenderer());
+        table.addMouseListener(new JTableButtonMouseListener(table));
         updateFooter();
     }
 
@@ -217,8 +223,10 @@ public class MainFrame extends JFrame implements ActionListener {
             String fileName = fc.getSelectedFile().getAbsolutePath();
             String extension = FilenameUtils.getExtension(fileName);
             if (extension.equals("csv")){
+                shoppingCart.getItems().clear();
                 shoppingCart = file.loadFileCsv(fileName);
             } else if (extension.equals("xml")){
+                shoppingCart.getItems().clear();
                 shoppingCart = file.loadFileXML(fileName);
             } else {
                 JOptionPane.showMessageDialog(this, "Soubor tohoto typu nelze otevrit.");
@@ -229,14 +237,18 @@ public class MainFrame extends JFrame implements ActionListener {
 
     private void newFile() {
         int n = JOptionPane.showConfirmDialog(this, "Potvrzenim se smaze aktualni seznam, chcete pokracovat?");
-        if (n != 0)
-            return;
-        shoppingCart = new ShoppingCart();
+        if (n == 0)
+            shoppingCart.getItems().clear();
         update();
     }
 
     private void author() {
         JOptionPane.showMessageDialog(this, "\u00a9 Matěj Boura 2020");
+    }
+
+    public void updateCart() {
+        shoppingCart.updateCart();
+        update();
     }
 
     private static class JTableButtonRenderer implements TableCellRenderer {

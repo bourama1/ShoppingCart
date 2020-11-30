@@ -50,8 +50,11 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 final JButton button = new JButton("Odebrat");
                 button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(button),
-                                "Button clicked for row "+rowIndex);
+                        int n = JOptionPane.showConfirmDialog(JOptionPane.getFrameForComponent(button),
+                                "Opravdu chcete smazat tento výrobek?");
+                        if (n == 0)
+                            deleteItem(rowIndex);
+                        main.update();
                     }
                 });
                 return button;
@@ -115,10 +118,14 @@ public class ShoppingCartTableModel extends AbstractTableModel {
         if(4 == columnIndex) {
             row.setPurchased((Boolean) aValue);
         }
-        main.updateFooter();
+        main.updateCart();
     }
 
     public void setShoppingCart(ShoppingCart shoppingCart) {
         this.shoppingCart = shoppingCart;
+    }
+
+    private void deleteItem(int row) {
+        shoppingCart.getItems().remove(row);
     }
 }
