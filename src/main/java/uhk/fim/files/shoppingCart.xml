@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<root><Item Name="telefon" PricePerPiece="9999.0" Pieces="6"/><Item Name="ntb" PricePerPiece="29999.0" Pieces="3"/></root>
+<root><Item Name="laptop" PricePerPiece="15999.0" Pieces="11" Purchased="true"/><Item Name="mobil" PricePerPiece="3999.0" Pieces="21" Purchased="true"/><Item Name="pc" PricePerPiece="39499.0" Pieces="1" Purchased="true"/></root>

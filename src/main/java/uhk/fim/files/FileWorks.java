@@ -17,7 +17,7 @@ public class FileWorks {
             BufferedReader csvReader = new BufferedReader(new FileReader(fileName));
             while ((row = csvReader.readLine()) != null) {
                 String[] data = row.split(";");
-                shoppingCart.addItem(new ShoppingCartItem(data[0], Double.parseDouble(data[1]), Integer.parseInt(data[2])));
+                shoppingCart.addItem(new ShoppingCartItem(data[0], Double.parseDouble(data[1]), Integer.parseInt(data[2]), Boolean.parseBoolean(data[3])));
             }
             csvReader.close();
         } catch (IOException e) {
@@ -39,7 +39,8 @@ public class FileWorks {
                 String name = item.attributeValue("Name");
                 double price = Double.parseDouble(item.attributeValue("PricePerPiece"));
                 int pieces = Integer.parseInt(item.attributeValue("Pieces"));
-                shoppingCart.addItem(new ShoppingCartItem(name, price, pieces));
+                boolean purchased = Boolean.parseBoolean(item.attributeValue("Purchased"));
+                shoppingCart.addItem(new ShoppingCartItem(name, price, pieces, purchased));
             }
         } catch (DocumentException e) {
             e.printStackTrace();
@@ -50,7 +51,7 @@ public class FileWorks {
     public void saveFileCsv(String fileName, ShoppingCart shoppingCart) {
         try (BufferedWriter bfw = new BufferedWriter(new FileWriter(fileName, false))) {
             for (ShoppingCartItem item : shoppingCart.getItems()) {
-                bfw.write(item.getName() + ";" + item.getPricePerPiece() + ";" + item.getPieces());
+                bfw.write(item.getName() + ";" + item.getPricePerPiece() + ";" + item.getPieces() + ";" + item.isPurchased());
                 bfw.newLine();
             }
         } catch (IOException e) {
@@ -66,7 +67,8 @@ public class FileWorks {
                 root.addElement("Item")
                         .addAttribute("Name", item.getName())
                         .addAttribute("PricePerPiece", String.valueOf(item.getPricePerPiece()))
-                        .addAttribute("Pieces", String.valueOf(item.getPieces()));
+                        .addAttribute("Pieces", String.valueOf(item.getPieces()))
+                        .addAttribute("Purchased", String.valueOf(item.isPurchased()));
             }
             try (FileWriter fileWriter = new FileWriter(fileName)) {
                 XMLWriter writer = new XMLWriter(fileWriter);

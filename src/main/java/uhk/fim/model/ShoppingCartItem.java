@@ -4,11 +4,13 @@ public class ShoppingCartItem {
     private String name;
     private double pricePerPiece;
     private int pieces;
+    private boolean purchased;
 
-    public ShoppingCartItem(String name, double pricePerPiece, int pieces) {
+    public ShoppingCartItem(String name, double pricePerPiece, int pieces, boolean purchased) {
         this.name = name;
         this.pricePerPiece = pricePerPiece;
         this.pieces = pieces;
+        this.purchased = purchased;
     }
 
     public String getName() {
@@ -33,6 +35,14 @@ public class ShoppingCartItem {
 
     public void setPieces(int pieces) {
         this.pieces = pieces;
+    }
+
+    public boolean isPurchased() {
+        return purchased;
+    }
+
+    public void setPurchased(boolean purchased) {
+        this.purchased = purchased;
     }
 
     public double getTotalPrice() {

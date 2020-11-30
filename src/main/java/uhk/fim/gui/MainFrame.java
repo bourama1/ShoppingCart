@@ -6,9 +6,12 @@ import uhk.fim.model.ShoppingCart;
 import uhk.fim.model.ShoppingCartItem;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MainFrame extends JFrame implements ActionListener {
     // Tlačítka deklarujeme zde, abychom k nim měli přístup v metodě actionPerformed
@@ -18,15 +21,17 @@ public class MainFrame extends JFrame implements ActionListener {
 
     // Labels
     JLabel lblTotalPrice;
+    JLabel lblPurchasedPrice;
 
     ShoppingCart shoppingCart;
     ShoppingCartTableModel model;
     FileWorks file;
 
     public MainFrame(int width, int height) {
-        super("PRO2 - Shopping cart");
+        super("PRO2 - Shopping cart - Matej Boura");
         setSize(width, height);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setIconImage(new ImageIcon("logo.jpg").getImage());
 
 
         file = new FileWorks();
@@ -49,6 +54,8 @@ public class MainFrame extends JFrame implements ActionListener {
         JPanel panelInputs = new JPanel(new FlowLayout(FlowLayout.LEFT)); // FlowLayout LEFT - komponenty chceme zarovnat zleva doprava.
         JPanel panelTable = new JPanel(new BorderLayout());
         JPanel panelFooter = new JPanel(new BorderLayout());
+
+        panelFooter.setBackground(Color.CYAN);
 
         // *** Formulář pro přidání položky ***
         // Název
@@ -76,14 +83,22 @@ public class MainFrame extends JFrame implements ActionListener {
 
         // *** Tabulka ***
         JTable table = new JTable();
+        table.setFillsViewportHeight(true);
+        TableCellRenderer buttonRenderer = new JTableButtonRenderer();
+
         // Tabulku propojíme s naším modelem
+        model.setMainFrame(this);
         table.setModel(model);
+        table.getColumn("Odebrat").setCellRenderer(buttonRenderer);
+        table.addMouseListener(new JTableButtonMouseListener(table));
         // Tabulku přidáme do panelu a obalíme ji komponentou JScrollPane
         panelTable.add(new JScrollPane(table), BorderLayout.CENTER);
 
         // *** Patička ***
         lblTotalPrice = new JLabel("");
         panelFooter.add(lblTotalPrice, BorderLayout.WEST);
+        lblPurchasedPrice = new JLabel("");
+        panelFooter.add(lblPurchasedPrice, BorderLayout.EAST);
 
         // Přidání (pod)panelů do panelu hlavního
         panelMain.add(panelInputs, BorderLayout.NORTH);
@@ -126,6 +141,12 @@ public class MainFrame extends JFrame implements ActionListener {
 
         JMenu aboutMenu = new JMenu("O programu");
         menuBar.add(aboutMenu);
+        aboutMenu.add(new AbstractAction("Autor") {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                author();
+            }
+        });
 
         setJMenuBar(menuBar);
     }
@@ -145,7 +166,7 @@ public class MainFrame extends JFrame implements ActionListener {
             try {
                 // Vytvořit novou položku
                 ShoppingCartItem item = new ShoppingCartItem(txtInputName.getText().trim(), Double.parseDouble(txtInputPricePerPiece.getText().replace(",", ".")),
-                        (int) spInputPieces.getValue());
+                        (int) spInputPieces.getValue(), false);
                 // Přidat položku do košíku
                 shoppingCart.addItem(item);
                 // Refreshnout tabulku
@@ -169,8 +190,10 @@ public class MainFrame extends JFrame implements ActionListener {
         updateFooter();
     }
 
-    private void updateFooter() {
+    public void updateFooter() {
         lblTotalPrice.setText("Celková cena: " + String.format("%.2f", shoppingCart.getTotalPrice()) + " Kč");
+        lblPurchasedPrice.setText("Cena zakoupených: " + String.format("%.2f", shoppingCart.getPurchasedPrice()) + " Kč  " +
+                                "Cena nezakoupených: " + String.format("%.2f", shoppingCart.getUnpurchasedPrice()) + " Kč");
     }
 
     private void saveFile() {
@@ -210,5 +233,37 @@ public class MainFrame extends JFrame implements ActionListener {
             return;
         shoppingCart = new ShoppingCart();
         update();
+    }
+
+    private void author() {
+        JOptionPane.showMessageDialog(this, "\u00a9 Matěj Boura 2020");
+    }
+
+    private static class JTableButtonRenderer implements TableCellRenderer {
+        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            return (JButton)value;
+        }
+    }
+
+    private static class JTableButtonMouseListener extends MouseAdapter {
+        private final JTable table;
+
+        public JTableButtonMouseListener(JTable table) {
+            this.table = table;
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            int column = table.getColumnModel().getColumnIndexAtX(e.getX()); // get the coloum of the button
+            int row    = e.getY()/table.getRowHeight(); //get the row of the button
+
+
+            if (row < table.getRowCount() && row >= 0 && column < table.getColumnCount() && column >= 0) {
+                Object value = table.getValueAt(row, column);
+                if (value instanceof JButton) {
+
+                    ((JButton)value).doClick();
+                }
+            }
+        }
     }
 }

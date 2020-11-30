@@ -3,11 +3,21 @@ package uhk.fim.gui;
 import uhk.fim.model.ShoppingCart;
 import uhk.fim.model.ShoppingCartItem;
 
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ShoppingCartTableModel extends AbstractTableModel {
     // V modelu potřebujeme referenci na data
     private ShoppingCart shoppingCart;
+    private MainFrame main;
+
+    public void setMainFrame(MainFrame main){
+        this.main = main;
+    }
 
     @Override
     public int getRowCount() {
@@ -16,7 +26,7 @@ public class ShoppingCartTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 6;
     }
 
     // Tato metoda se volá, když se tabulka dotazuje hodnotu v buňce. Tedy pro kažkou buňku.
@@ -34,6 +44,17 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return item.getPieces();
             case 3:
                 return item.getTotalPrice();
+            case 4:
+                return item.isPurchased();
+            case 5:
+                final JButton button = new JButton("Odebrat");
+                button.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent arg0) {
+                        JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(button),
+                                "Button clicked for row "+rowIndex);
+                    }
+                });
+                return button;
             default:
                 return null;
         }
@@ -52,6 +73,10 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return "Počet kusů";
             case 3:
                 return "Cena celkem";
+            case 4:
+                return "Zakoupeno";
+            case 5:
+                return "Odebrat";
             default:
                 return null;
         }
@@ -69,9 +94,28 @@ public class ShoppingCartTableModel extends AbstractTableModel {
                 return Integer.class;
             case 3:
                 return Double.class;
+            case 4:
+                return Boolean.class;
+            case 5:
+                return JButton.class;
             default:
                 return null;
         }
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return column == 4;
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex)
+    {
+        ShoppingCartItem row = shoppingCart.getItems().get(rowIndex);
+        if(4 == columnIndex) {
+            row.setPurchased((Boolean) aValue);
+        }
+        main.updateFooter();
     }
 
     public void setShoppingCart(ShoppingCart shoppingCart) {

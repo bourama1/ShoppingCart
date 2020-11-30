@@ -35,4 +35,17 @@ public class ShoppingCart {
         }
         return sum;
     }
+
+    public double getPurchasedPrice() {
+        double sum = 0;
+        for (ShoppingCartItem item : items) {
+            if (item.isPurchased())
+                sum += item.getTotalPrice();
+        }
+        return sum;
+    }
+
+    public double getUnpurchasedPrice() {
+        return getTotalPrice() - getPurchasedPrice();
+    }
 }
