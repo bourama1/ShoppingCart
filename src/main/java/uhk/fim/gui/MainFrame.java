@@ -1,8 +1,7 @@
 package uhk.fim.gui;
 
 import org.apache.commons.io.FilenameUtils;
-import uhk.fim.files.LoadFile;
-import uhk.fim.files.SaveFile;
+import uhk.fim.files.FileWorks;
 import uhk.fim.model.ShoppingCart;
 import uhk.fim.model.ShoppingCartItem;
 
@@ -22,8 +21,7 @@ public class MainFrame extends JFrame implements ActionListener {
 
     ShoppingCart shoppingCart;
     ShoppingCartTableModel model;
-    SaveFile saveFile;
-    LoadFile loadFile;
+    FileWorks file;
 
     public MainFrame(int width, int height) {
         super("PRO2 - Shopping cart");
@@ -31,11 +29,10 @@ public class MainFrame extends JFrame implements ActionListener {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 
-        saveFile = new SaveFile();
-        loadFile = new LoadFile();
+        file = new FileWorks();
         // Vytvoříme košík (data)
         shoppingCart = new ShoppingCart();
-        shoppingCart = loadFile.loadFileCsv("storage.csv");
+        shoppingCart = file.loadFileCsv("storage.csv");
         update();
     }
 
@@ -116,7 +113,7 @@ public class MainFrame extends JFrame implements ActionListener {
         fileMenu.add(new AbstractAction("Uložit") {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                saveFile.saveFileCsv("storage.csv", shoppingCart);
+                file.saveFileCsv("storage.csv", shoppingCart);
             }
         });
         fileMenu.add(new AbstractAction("Uložit jako") {
@@ -182,9 +179,9 @@ public class MainFrame extends JFrame implements ActionListener {
             String fileName = fc.getSelectedFile().getAbsolutePath();
             String extension = FilenameUtils.getExtension(fileName);
             if (extension.equals("csv")){
-                saveFile.saveFileCsv(fileName, shoppingCart);
+                file.saveFileCsv(fileName, shoppingCart);
             } else if (extension.equals("xml")){
-                saveFile.saveFileXML(fileName, shoppingCart);
+                file.saveFileXML(fileName, shoppingCart);
             } else {
                 JOptionPane.showMessageDialog(this, "Soubor tohoto typu nelze ulozit.");
             }
@@ -197,9 +194,9 @@ public class MainFrame extends JFrame implements ActionListener {
             String fileName = fc.getSelectedFile().getAbsolutePath();
             String extension = FilenameUtils.getExtension(fileName);
             if (extension.equals("csv")){
-                shoppingCart = loadFile.loadFileCsv(fileName);
+                shoppingCart = file.loadFileCsv(fileName);
             } else if (extension.equals("xml")){
-                shoppingCart = loadFile.loadFileXML(fileName);
+                shoppingCart = file.loadFileXML(fileName);
             } else {
                 JOptionPane.showMessageDialog(this, "Soubor tohoto typu nelze otevrit.");
             }
